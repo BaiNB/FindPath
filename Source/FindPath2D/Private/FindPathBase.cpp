@@ -144,7 +144,7 @@ void UFindPathBase::FindStep()
 			// 若由currPoint到达neibor的GnCost更小则更新parent
 			// GnCost(currPoint) + Distance(currPoint, neibor) < openSet[idx]->gnCost
 			if (CmpSamePoint(neibor, openSet[idx])) {
-				UE_LOG(LogTemp, Warning, TEXT("Find repeat point."));
+				//UE_LOG(LogTemp, Warning, TEXT("Find repeat point."));
 				openSet[idx]->parent = currPoint;
 			}
 		}

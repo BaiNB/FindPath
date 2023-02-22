@@ -17,4 +17,8 @@ public:
 	UFindPathBFS();
 
 	virtual void FindStep() override;
+	virtual void Start() override;
+
+	TQueue<TSharedPtr<FPoint>> openQue;
+	
 };

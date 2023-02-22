@@ -11,6 +11,10 @@
 #include "Prop.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Kismet/GameplayStatics.h"
+#include "NavigationSystem/Public/NavigationSystem.h"
+#include "NavigationSystem/Public/NavigationPath.h"
+#include "NavMesh/RecastNavMesh.h"
+#include "AI/NavDataGenerator.h"
 
 
 // Sets default values
@@ -38,7 +42,7 @@ void AMapCreator::BeginPlay()
 	//UE_LOG(LogTemp, Warning, TEXT("target: %s"), *outActors[0]->GetActorLocation().ToString());
 
 	//auto cmp = [](int a, int b) {
-	//	return a < b;
+	//	return true;
 	//};
 	//TArray<int> testSet;
 	//testSet.Push(100);
@@ -55,7 +59,6 @@ void AMapCreator::BeginPlay()
  //   UE_LOG(LogTemp, Warning, TEXT("%i"), val);
  // }
 
-	
 }
 
 // Called every frame
@@ -125,5 +128,34 @@ void AMapCreator::CreateMap()
 	GEditor->EditorUpdateComponents();
 	world->UpdateWorldComponents(true, false);
 	GLevelEditorModeTools().MapChangeNotify();
+}
+
+void AMapCreator::ExportNavMesh()
+{
+	UNavigationSystemV1* const NavSys = UNavigationSystemV1::GetNavigationSystem(GetWorld());
+	if (NavSys) {
+		TArray<AActor*> OutActors;
+		UGameplayStatics::GetAllActorsWithTag(this, FName("start"), OutActors);
+		UE_LOG(LogTemp, Warning, TEXT("start: %d"), OutActors.Num());
+		check(OutActors.Num() == 1);
+		AActor* start = OutActors[0];
+
+		UGameplayStatics::GetAllActorsWithTag(this, FName("target"), OutActors);
+		UE_LOG(LogTemp, Warning, TEXT("target: %d"), OutActors.Num());
+		check(OutActors.Num() == 1);
+		AActor* end = OutActors[0];
+
+		UNavigationPath* path = NavSys->FindPathToLocationSynchronously(GetWorld(), start->GetActorLocation() + FVector(0, 0, -50), end->GetActorLocation() + FVector(0, 0, -50));
+		if (path != NULL) {
+			UE_LOG(LogTemp, Warning, TEXT("PathPoints.num: %d"), path->PathPoints.Num());
+		}
+		ANavigationData* NavData = NavSys->GetDefaultNavDataInstance(FNavigationSystem::ECreateIfEmpty::DontCreate);
+		if (NavData) {
+			ARecastNavMesh* NavMesh = Cast<ARecastNavMesh>(NavData);
+			NavMesh->GetGenerator()->ExportNavigationData(TEXT("F:\\UE_projects\\FindPath2D\\Saved\\"));
+			UE_LOG(LogTemp, Warning, TEXT("Export NavMesh Succeed."));
+		}
+	}
+
 }
 

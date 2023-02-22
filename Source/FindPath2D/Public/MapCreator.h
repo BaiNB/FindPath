@@ -9,29 +9,33 @@
 UCLASS()
 class FINDPATH2D_API AMapCreator : public AActor
 {
-	GENERATED_BODY()
-	
-public:	
-	// Sets default values for this actor's properties
-	AMapCreator();
+  GENERATED_BODY()
+
+public:
+  // Sets default values for this actor's properties
+  AMapCreator();
 
 protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
+  // Called when the game starts or when spawned
+  virtual void BeginPlay() override;
 
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+public:
+  // Called every frame
+  virtual void Tick(float DeltaTime) override;
 
 
 public:
-	//UPROPERTY(VisibleAnywhere)
-	//	USceneComponent* rootComp;
+  //UPROPERTY(VisibleAnywhere)
+  //	USceneComponent* rootComp;
 
-	TArray<FString> mapInfoArr;
-	void LoadMapInfo();	// 读取地图信息
+  TArray<FString> mapInfoArr;
+  void LoadMapInfo();	// 读取地图信息
 
 public:
-	UFUNCTION(BlueprintCallable, CallInEditor)
-	void CreateMap();	// 创建地图
+  UFUNCTION(BlueprintCallable, CallInEditor)
+    void CreateMap();	// 创建地图
+
+  UFUNCTION(BlueprintCallable, CallInEditor)
+    void ExportNavMesh();	// 导出NavMesh
+
 };
