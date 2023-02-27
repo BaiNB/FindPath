@@ -17,13 +17,13 @@ class FINDPATH2D_API UFindPathAStar : public UFindPathBase
 public:
 	UFindPathAStar();
 
-	virtual bool CmpSamePoint(TSharedPtr<FPoint>& neibor, TSharedPtr<FPoint>& oldNeibor) {
-		if (neibor->gnCost < oldNeibor->gnCost) {
-			oldNeibor->gnCost = neibor->gnCost;
-			return true;
-		}
-		return false;
-	}
+	//virtual bool CmpSamePoint(TSharedPtr<FPoint>& neibor, TSharedPtr<FPoint>& oldNeibor) {
+	//	if (neibor->gnCost < oldNeibor->gnCost) {
+	//		//oldNeibor->gnCost = neibor->gnCost;
+	//		return true;
+	//	}
+	//	return false;
+	//}
 
 	virtual float Cost(const TSharedPtr<FPoint>& p) {
 		return GnCost(p) + HnCost(p);

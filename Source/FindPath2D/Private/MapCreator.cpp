@@ -16,6 +16,8 @@
 #include "NavMesh/RecastNavMesh.h"
 #include "AI/NavDataGenerator.h"
 
+#include "Algo/Impl/BinaryHeap.h"
+
 
 // Sets default values
 AMapCreator::AMapCreator()
@@ -42,15 +44,35 @@ void AMapCreator::BeginPlay()
 	//UE_LOG(LogTemp, Warning, TEXT("target: %s"), *outActors[0]->GetActorLocation().ToString());
 
 	//auto cmp = [](int a, int b) {
-	//	return true;
+	//	return a < b;
 	//};
 	//TArray<int> testSet;
-	//testSet.Push(100);
-	//testSet.Push(98);
-	//testSet.Push(120);
-	//for (int i = 0; i < 10; ++i) {
+
+	//for (int i = -5; i < 6; ++i) {
 	//	testSet.HeapPush(i, cmp);
 	//}
+
+	//testSet.HeapPush(100, cmp);
+	//testSet.HeapPush(98, cmp);
+	//testSet.HeapPush(120, cmp);
+
+	//FString showSet{};
+	//for (auto num : testSet) {
+	//	showSet += FString::FromInt(num);
+	//	showSet += " ";
+	//}
+	//UE_LOG(LogTemp, Warning, TEXT("showSet: %s"), *showSet);
+
+	//auto idx = testSet.Find(5);
+
+	//testSet.RemoveAtSwap(idx);
+	//auto PredicateWrapper(cmp);
+	//AlgoImpl::HeapSiftDown(testSet.GetData(), idx, testSet.Num(), FIdentityFunctor(), PredicateWrapper);
+
+	////testSet.Heapify(cmp);
+	//testSet.HeapPush(-3, cmp);
+
+
  // FString str = FString::FromInt(testSet.Num());
  // UE_LOG(LogTemp, Warning, TEXT("testSet.Num: %s"), *str);
  // int val = -1;
@@ -70,8 +92,24 @@ void AMapCreator::Tick(float DeltaTime)
 
 void AMapCreator::LoadMapInfo()
 {
-	FString path = FPaths::ProjectDir() + FString("MapInfo.txt");
+	FString path = FPaths::ProjectDir() + FString("MapInfoEnemy.txt");
 	FFileHelper::LoadFileToStringArray(mapInfoArr, *path);
+}
+
+void AMapCreator::AddingBattlefieldInfo()
+{
+	LoadMapInfo();
+	// (2500,4000,0)->(5000,5000,0)设置为enemy区域
+	FVector start(25, 40, 0);
+	FVector end(50, 50, 0);
+	for (int i = start.X; i <= end.X; ++i) {
+		for (int j = start.Y; j <= end.Y; ++j) {
+			mapInfoArr[i * 75 + j] += "0";
+			UKismetSystemLibrary::DrawDebugPlane(GetWorld(), FPlane(FVector(0, 0, -40), FVector::UpVector), FVector(i * 100, j * 100, 200) , 50, FLinearColor::Red, 5);
+		}
+	}
+	FString path = FPaths::ProjectDir() + FString("MapInfoEnemy.txt");
+	FFileHelper::SaveStringArrayToFile(mapInfoArr, *path);
 }
 
 void AMapCreator::CreateMap()
@@ -88,7 +126,7 @@ void AMapCreator::CreateMap()
 	}
 
 	// 使用GEditor需要在Build.cs里添加UnrealEd模块
-	if (mapInfoArr.Num() == 0 || GEditor == nullptr) { // || GEditor == nullptr
+	if (mapInfoArr.Num() == 0 || GEditor == nullptr) {
 		return;
 	}
 	UWorld* world = GEditor->GetAllViewportClients()[0]->GetWorld();

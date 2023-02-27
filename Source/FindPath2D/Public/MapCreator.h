@@ -31,6 +31,9 @@ public:
   TArray<FString> mapInfoArr;
   void LoadMapInfo();	// 读取地图信息
 
+  UFUNCTION(BlueprintCallable, CallInEditor)
+  void AddingBattlefieldInfo(); // 增加战场环境约束
+
 public:
   UFUNCTION(BlueprintCallable, CallInEditor)
     void CreateMap();	// 创建地图

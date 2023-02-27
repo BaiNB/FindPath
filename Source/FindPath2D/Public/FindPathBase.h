@@ -61,6 +61,7 @@ public:
 	TSharedPtr<FPoint> targetPoint;
 	TSharedPtr<FPoint> currPoint;
 
+	// 10---障碍物; 20---可通行; 100/200---enemy; 40---地雷; 
 	TArray<FString> mapInfoArr;
 	FTimerHandle timerHandle;
 	bool bFinding;
@@ -79,8 +80,15 @@ public:
 
 	bool IsValid(int x, int y);
 
+	virtual bool IsPassable(int idx);
+
 	virtual bool CmpSamePoint(TSharedPtr<FPoint>& neibor, TSharedPtr<FPoint>& oldNeibor) {
+		if (neibor->gnCost < oldNeibor->gnCost) {
+			//oldNeibor->gnCost = neibor->gnCost;
+			return true;
+		}
 		return false;
+
 	}
 
 	virtual float GnCost(const TSharedPtr<FPoint>& p) {
@@ -94,11 +102,9 @@ public:
 	}
 
 	virtual float Cost(const TSharedPtr<FPoint>& p) {
-		UE_LOG(LogTemp, Warning, TEXT("This is Base::Cost"));
 		return 0;
 	}
+private:
+	void PopSmallestPoint(TSharedPtr<FPoint>& outPoint, TArray<TSharedPtr<FPoint>>& set);
 
-	//virtual bool CmpCost(const TSharedPtr<FPoint>& a, const TSharedPtr<FPoint>& b) const {
-	//	return Cost(a) < Cost(b);
-	//}
 };

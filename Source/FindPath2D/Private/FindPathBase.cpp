@@ -5,6 +5,8 @@
 
 #include "MapCreator.h"
 #include "Kismet/GameplayStatics.h"
+#include "Algo/Impl/BinaryHeap.h"
+
 
 // Sets default values for this component's properties
 UFindPathBase::UFindPathBase()
@@ -65,12 +67,12 @@ void UFindPathBase::Start()
 	UGameplayStatics::GetAllActorsWithTag(this, "start", outActors);
 	check(outActors.Num() == 1);
 	startPoint = MakeShareable(new FPoint(outActors[0]->GetActorLocation() + FVector(0, 0, -50)));
-	UE_LOG(LogTemp, Warning, TEXT("start: %s"), *startPoint->pos.ToString());
+	//UE_LOG(LogTemp, Warning, TEXT("start: %s"), *startPoint->pos.ToString());
 	outActors.Empty();
 	UGameplayStatics::GetAllActorsWithTag(this, "target", outActors);
 	check(outActors.Num() == 1);
 	targetPoint = MakeShareable(new FPoint(outActors[0]->GetActorLocation() + FVector(0, 0, -50)));
-	UE_LOG(LogTemp, Warning, TEXT("target: %s"), *targetPoint->pos.ToString());
+	//UE_LOG(LogTemp, Warning, TEXT("target: %s"), *targetPoint->pos.ToString());
 
 
 	// 将起点加入openSet
@@ -96,27 +98,16 @@ void UFindPathBase::FindStep()
 		return Cost(a) < Cost(b);
 	};
 
-	//TSharedPtr<FPoint> testPtr = nullptr;
-	//if (openSet.Num() > 20) {
-	//	while (openSet.Num() != 0) {
-	//		openSet.HeapPop(testPtr, cmp);
-	//		float gnCost = testPtr->gnCost;
-	//		float hnCost = testPtr->hnCost;
-	//		float cost = gnCost + hnCost;
-	//		UE_LOG(LogTemp, Warning, TEXT("%f +%f = %f"), gnCost, hnCost, cost);
-	//	}
-	//	bFinding = false;
-	//	return;
-	//}
-
-	openSet.HeapPop(currPoint, cmp);
+	// 找到openSet里fn最小的点，赋值给currPoint
+	PopSmallestPoint(currPoint, openSet);
+	//openSet.HeapPop(currPoint, cmp);
 	closeSet.Push(currPoint);
 
 	if (currPoint->pos.Equals(targetPoint->pos, 1.0f)) {
 		// find targetPoint
 		bFinding = false;
 		GetWorld()->GetTimerManager().ClearTimer(timerHandle);
-		UE_LOG(LogTemp, Warning, TEXT("Find target."));
+		//UE_LOG(LogTemp, Warning, TEXT("Find target."));
 		FinishFind();
 		return;
 	}
@@ -145,11 +136,16 @@ void UFindPathBase::FindStep()
 			// GnCost(currPoint) + Distance(currPoint, neibor) < openSet[idx]->gnCost
 			if (CmpSamePoint(neibor, openSet[idx])) {
 				//UE_LOG(LogTemp, Warning, TEXT("Find repeat point."));
+				openSet[idx]->gnCost = neibor->gnCost;
 				openSet[idx]->parent = currPoint;
+				auto temp = openSet[idx];
+
+				openSet.RemoveAtSwap(idx);
+				openSet.Push(temp);
 			}
 		}
 		else {
-			openSet.HeapPush(neibor, cmp); // &UFindPathBase::CmpCost
+			openSet.Push(neibor);
 		}
 		UKismetSystemLibrary::DrawDebugPlane(GetWorld(), FPlane(FVector(0, 0, -40), FVector::UpVector), currPoint->pos, 50, FLinearColor::Red, 5);
 
@@ -177,12 +173,33 @@ bool UFindPathBase::IsValid(int x, int y)
 		// map overflow
 		return false;
 	}
-	if (!mapInfoArr[x * 75 + y].Equals("20")) {
+	//auto flag = mapInfoArr[idx].Left(2);
+	//flag.Equals("10");
+	if (IsPassable(x * 75 + y)) {
 		// (x, y) is barrier
 		return false;
 	}
 
 	return true;
+}
+
+bool UFindPathBase::IsPassable(int idx)
+{
+	return mapInfoArr[idx].Equals("10");
+}
+
+void UFindPathBase::PopSmallestPoint(TSharedPtr<FPoint>& outPoint, TArray<TSharedPtr<FPoint>>& set)
+{
+	TSharedPtr<FPoint> minPoint = set[0];
+	int minIdx = 0, size = set.Num();
+	for (int i = 1; i < size; ++i) {
+		if (Cost(set[i]) < Cost(minPoint)) {
+			minPoint = set[i];
+			minIdx = i;
+		}
+	}
+	outPoint = minPoint;
+	set.RemoveAtSwap(minIdx);
 }
 
 
