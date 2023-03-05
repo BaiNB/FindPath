@@ -173,10 +173,8 @@ bool UFindPathBase::IsValid(int x, int y)
 		// map overflow
 		return false;
 	}
-	//auto flag = mapInfoArr[idx].Left(2);
-	//flag.Equals("10");
-	if (IsPassable(x * 75 + y)) {
-		// (x, y) is barrier
+	if (!IsPassable(x * 75 + y)) {
+		// (x, y) is a barrier
 		return false;
 	}
 
@@ -185,7 +183,8 @@ bool UFindPathBase::IsValid(int x, int y)
 
 bool UFindPathBase::IsPassable(int idx)
 {
-	return mapInfoArr[idx].Equals("10");
+	auto flag = mapInfoArr[idx].Left(2);
+	return flag.Equals("20");
 }
 
 void UFindPathBase::PopSmallestPoint(TSharedPtr<FPoint>& outPoint, TArray<TSharedPtr<FPoint>>& set)

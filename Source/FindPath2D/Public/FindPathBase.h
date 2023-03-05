@@ -61,7 +61,7 @@ public:
 	TSharedPtr<FPoint> targetPoint;
 	TSharedPtr<FPoint> currPoint;
 
-	// 10---障碍物; 20---可通行; 100/200---enemy; 40---地雷; 
+	// 10---障碍物; 20---可通行; 100/200---enemy; 200/2000---地雷; 
 	TArray<FString> mapInfoArr;
 	FTimerHandle timerHandle;
 	bool bFinding;

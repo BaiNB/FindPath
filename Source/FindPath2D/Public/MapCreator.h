@@ -29,6 +29,17 @@ public:
   //	USceneComponent* rootComp;
 
   TArray<FString> mapInfoArr;
+
+  UPROPERTY(VisibleAnywhere)
+    USceneComponent* rootComp;
+  UPROPERTY(EditAnywhere)
+  int mineNum = 5;
+  UPROPERTY(EditAnywhere)
+    UStaticMesh* mineMesh;
+  UPROPERTY(EditAnywhere)
+    UMaterialInterface* mineMaterial;
+
+
   void LoadMapInfo();	// 读取地图信息
 
   UFUNCTION(BlueprintCallable, CallInEditor)

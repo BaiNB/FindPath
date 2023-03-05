@@ -3,22 +3,19 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "FindPathBase.h"
-#include "FindPathAStar.generated.h"
+#include "AStarOptimizeSpeed.h"
+#include "AStarWithEnemySpeedUp.generated.h"
 
 /**
  * 
  */
 UCLASS(ClassGroup = (FindPath), meta = (BlueprintSpawnableComponent))
-class FINDPATH2D_API UFindPathAStar : public UFindPathBase
+class FINDPATH2D_API UAStarWithEnemySpeedUp : public UAStarOptimizeSpeed
 {
 	GENERATED_BODY()
-	
 public:
-	UFindPathAStar();
+	UAStarWithEnemySpeedUp();
 
-	virtual float Cost(const TSharedPtr<FPoint>& p) {
-		return GnCost(p) + HnCost(p);
-	}
-
+	virtual bool IsPassable(int idx) override;
+	
 };

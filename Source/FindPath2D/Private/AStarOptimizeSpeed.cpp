@@ -8,7 +8,7 @@
 #include "Algo/Impl/BinaryHeap.h"
 
 
-UAStarOptimizeSpeed::UAStarOptimizeSpeed() {
+	UAStarOptimizeSpeed::UAStarOptimizeSpeed() {
   ComponentTags.Add("SpeedAStar");
 }
 
@@ -42,7 +42,7 @@ void UAStarOptimizeSpeed::FindStep()
 	};
 
 	openSet.HeapPop(currPoint, cmp);
-	closeSet.Push(currPoint);
+	//closeSet.Push(currPoint);
 	pointFlag.Emplace(currPoint->pos, 0);
 
 	if (currPoint->pos.Equals(targetPoint->pos, 1.0f)) {

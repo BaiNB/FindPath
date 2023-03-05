@@ -9,10 +9,12 @@
 #include "Misc/Paths.h"
 #include "Misc/FileHelper.h"
 #include "Prop.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Kismet/GameplayStatics.h"
-#include "NavigationSystem/Public/NavigationSystem.h"
-#include "NavigationSystem/Public/NavigationPath.h"
+
+#include "NavigationSystem.h"
+#include "NavigationPath.h"
 #include "NavMesh/RecastNavMesh.h"
 #include "AI/NavDataGenerator.h"
 
@@ -94,6 +96,32 @@ void AMapCreator::LoadMapInfo()
 {
 	FString path = FPaths::ProjectDir() + FString("MapInfoEnemy.txt");
 	FFileHelper::LoadFileToStringArray(mapInfoArr, *path);
+
+	// 随机生成mineNum个地雷
+	int num = 0;
+	while (num < mineNum) {
+		// 随机生成(x,y)
+		int32 randomX = UKismetMathLibrary::RandomInteger(26) + 24;
+		int32 randomY = UKismetMathLibrary::RandomInteger(26) + 24;
+		auto flag = mapInfoArr[randomX * 75 + randomY].Left(2);
+		if (flag.Equals("10")) {
+			continue;
+		}
+		// 在(x,y)生成地雷
+		FVector location = FVector(randomX * 100, randomY * 100, 0);
+		FTransform transform(FRotator::ZeroRotator, location, FVector::OneVector);
+    UStaticMeshComponent* smComp = NewObject<UStaticMeshComponent>(this);
+    smComp->SetupAttachment(rootComp);
+    smComp->RegisterComponent();
+    smComp->SetRelativeTransform(transform);
+    smComp->SetStaticMesh(mineMesh);
+		smComp->SetMaterial(0, mineMaterial);
+
+		// 对地雷进行标识
+		mapInfoArr[randomX * 75 + randomY] += "0";
+		++num;
+	}
+
 }
 
 void AMapCreator::AddingBattlefieldInfo()
@@ -105,7 +133,7 @@ void AMapCreator::AddingBattlefieldInfo()
 	for (int i = start.X; i <= end.X; ++i) {
 		for (int j = start.Y; j <= end.Y; ++j) {
 			mapInfoArr[i * 75 + j] += "0";
-			UKismetSystemLibrary::DrawDebugPlane(GetWorld(), FPlane(FVector(0, 0, -40), FVector::UpVector), FVector(i * 100, j * 100, 200) , 50, FLinearColor::Red, 5);
+			//UKismetSystemLibrary::DrawDebugPlane(GetWorld(), FPlane(FVector(0, 0, -40), FVector::UpVector), FVector(i * 100, j * 100, 200) , 50, FLinearColor::Red, 5);
 		}
 	}
 	FString path = FPaths::ProjectDir() + FString("MapInfoEnemy.txt");
@@ -183,13 +211,16 @@ void AMapCreator::ExportNavMesh()
 		check(OutActors.Num() == 1);
 		AActor* end = OutActors[0];
 
+		//UNavigationSystemV1::FindPathSync();
 		UNavigationPath* path = NavSys->FindPathToLocationSynchronously(GetWorld(), start->GetActorLocation() + FVector(0, 0, -50), end->GetActorLocation() + FVector(0, 0, -50));
-		if (path != NULL) {
-			UE_LOG(LogTemp, Warning, TEXT("PathPoints.num: %d"), path->PathPoints.Num());
-		}
+		//if (path != NULL) {
+		//	UE_LOG(LogTemp, Warning, TEXT("PathPoints.num: %d"), path->PathPoints.Num());
+		//}
+
 		ANavigationData* NavData = NavSys->GetDefaultNavDataInstance(FNavigationSystem::ECreateIfEmpty::DontCreate);
 		if (NavData) {
 			ARecastNavMesh* NavMesh = Cast<ARecastNavMesh>(NavData);
+			NavMesh->GetRecastMesh(); // dtNavMesh
 			NavMesh->GetGenerator()->ExportNavigationData(TEXT("F:\\UE_projects\\FindPath2D\\Saved\\"));
 			UE_LOG(LogTemp, Warning, TEXT("Export NavMesh Succeed."));
 		}
