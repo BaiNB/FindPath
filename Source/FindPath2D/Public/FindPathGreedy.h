@@ -16,6 +16,10 @@ class FINDPATH2D_API UFindPathGreedy : public UFindPathBase
 public:
 	UFindPathGreedy();
 
+	virtual void SetMethodName() override {
+		methodName = "Greedy";
+	}
+
 	virtual float Cost(const TSharedPtr<FPoint>& p) override {
 		return HnCost(p);
 	}

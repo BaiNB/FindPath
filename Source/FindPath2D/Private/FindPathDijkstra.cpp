@@ -5,5 +5,6 @@
 
 UFindPathDijkstra::UFindPathDijkstra() {
 	ComponentTags.Add("Dijkstra");
+
 }
 

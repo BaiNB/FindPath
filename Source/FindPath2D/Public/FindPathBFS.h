@@ -16,6 +16,7 @@ class FINDPATH2D_API UFindPathBFS : public UFindPathBase
 public:
 	UFindPathBFS();
 
+
 	virtual void FindStep() override;
 	virtual void Start() override;
 

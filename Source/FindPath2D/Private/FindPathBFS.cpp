@@ -50,7 +50,7 @@ void UFindPathBFS::FindStep()
 		}
 
 		openQue.Enqueue(neibor);
-		UKismetSystemLibrary::DrawDebugPlane(GetWorld(), FPlane(FVector(0, 0, -40), FVector::UpVector), currPoint->pos, 50, FLinearColor::Red, 5);
+		UKismetSystemLibrary::DrawDebugPlane(GetWorld(), FPlane(FVector(0, 0, -40), FVector::UpVector), currPoint->pos, 50, FLinearColor::Red, 1);
 	}
 
 }

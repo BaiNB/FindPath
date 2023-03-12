@@ -17,6 +17,11 @@ class FINDPATH2D_API UFindPathAStar : public UFindPathBase
 public:
 	UFindPathAStar();
 
+	virtual void SetMethodName() override {
+		methodName = "AStar";
+
+	}
+
 	virtual float Cost(const TSharedPtr<FPoint>& p) {
 		return GnCost(p) + HnCost(p);
 	}

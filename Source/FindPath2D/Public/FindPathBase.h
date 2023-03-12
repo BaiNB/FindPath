@@ -5,8 +5,10 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Components/ArrowComponent.h"
+#include "MapCreator.h"
 
 #include "CoreMinimal.h"
+#include "ExportData.h"
 #include "Components/SceneComponent.h"
 #include "FindPathBase.generated.h"
 
@@ -19,7 +21,7 @@ public:
 	float gnCost = 0.0f;
 	float hnCost = 0.0f;
 	TSharedPtr<FPoint> parent;
-
+	unsigned int flag = 0; // 0/opened/closed
 	FPoint() : pos(FVector::ZeroVector), parent(nullptr) {
 
 	}
@@ -60,11 +62,16 @@ public:
 	TSharedPtr<FPoint> startPoint;
 	TSharedPtr<FPoint> targetPoint;
 	TSharedPtr<FPoint> currPoint;
+	TSharedPtr<ExportData> exportData;
 
 	// 10---障碍物; 20---可通行; 100/200---enemy; 200/2000---地雷; 
 	TArray<FString> mapInfoArr;
+	AMapCreator* mapCreator;
+	float carSize = 120.f;
+
 	FTimerHandle timerHandle;
 	bool bFinding;
+	FString methodName;
 
 public:
 	UFUNCTION(BlueprintCallable)
@@ -75,6 +82,7 @@ public:
 	virtual void Start();
 	virtual void FindStep();
 	virtual void FinishFind();
+	virtual void SetMethodName() {}
 
 	void BuildPath();
 

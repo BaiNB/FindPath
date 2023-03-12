@@ -16,6 +16,10 @@ class FINDPATH2D_API UFindPathDijkstra : public UFindPathBase
 public:
 	UFindPathDijkstra();
 
+	virtual void SetMethodName() override {
+		methodName = "Dijkstra";
+	}
+
 	virtual float Cost(const TSharedPtr<FPoint>& p) override {
 		return GnCost(p);
 	}

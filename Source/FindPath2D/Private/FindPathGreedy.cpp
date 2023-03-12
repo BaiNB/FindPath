@@ -5,4 +5,5 @@
 
 UFindPathGreedy::UFindPathGreedy() {
 	ComponentTags.Add("Greedy");
+
 }

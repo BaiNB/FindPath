@@ -5,5 +5,6 @@
 
 UFindPathAStar::UFindPathAStar() {
   ComponentTags.Add("AStar");
+
 }
 

@@ -3,26 +3,25 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "AStarOptimizeList.h"
-
-#include "AStarOptimizeSpeed.generated.h"
+#include "FindPathBase.h"
+#include "AStarWithWeightCost.generated.h"
 
 /**
  * 
  */
 UCLASS(ClassGroup = (FindPath), meta = (BlueprintSpawnableComponent))
-class FINDPATH2D_API UAStarOptimizeSpeed : public UAStarOptimizeList
+class FINDPATH2D_API UAStarWithWeightCost : public UFindPathBase
 {
 	GENERATED_BODY()
-
 public:
-	UAStarOptimizeSpeed();
+  UAStarWithWeightCost();
 
-	virtual void SetMethodName() override {
-		methodName = "SpeedAStar";
-	}
+  virtual void SetMethodName() override {
+    methodName = "AStarWithCost";
+  }
 
   virtual float Cost(const TSharedPtr<FPoint>& p) override;
 
-  float alpha = 0.1;
+  float alpha = 0.2;
+
 };
