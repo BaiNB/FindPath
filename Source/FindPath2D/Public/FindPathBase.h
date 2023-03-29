@@ -64,7 +64,7 @@ public:
 	TSharedPtr<FPoint> currPoint;
 	TSharedPtr<ExportData> exportData;
 
-	// 10---障碍物; 20---可通行; 100/200---enemy; 200/2000---地雷; 
+	// 10---障碍物; 20---可通行; 30---地雷; 
 	TArray<FString> mapInfoArr;
 	AMapCreator* mapCreator;
 	float carSize = 120.f;

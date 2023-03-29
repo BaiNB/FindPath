@@ -195,14 +195,14 @@ void UFindPathBase::FinishFind()
 	// 将数据写入res.txt并构建最终路径
 	BuildPath();
 
-	this->exportData->Export();
+	//this->exportData->Export();
 }
 
 
 void UFindPathBase::BuildPath()
 {
 	while (currPoint.IsValid()) {
-		UKismetSystemLibrary::DrawDebugPlane(GetWorld(), FPlane(FVector(0, 0, -30), FVector::UpVector), currPoint->pos, 50, FLinearColor::Blue, 1);
+		UKismetSystemLibrary::DrawDebugPlane(GetWorld(), FPlane(FVector(0, 0, -30), FVector::UpVector), currPoint->pos, 50, FLinearColor::Blue, 5);
 		++this->exportData->pathNodeNum; // 路径上的节点数量
 
 		// 记录路径上enemy区域内节点数量

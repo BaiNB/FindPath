@@ -61,6 +61,10 @@ void AMapCreator::SpawnMineBetween(const FVector& start, const FVector& end)
 		if (flag.Equals("10")) {
 			continue;
 		}
+		if ((randomX == startIdx.X && randomY == startIdx.Y) || (randomX == endIdx.X && randomY == endIdx.Y)) {
+			// 剔除start与end
+			continue;
+		}
 		// 在(x,y)生成地雷
 		FVector location = FVector(randomX * 100, randomY * 100, 0);
 		FTransform transform(FRotator::ZeroRotator, location, FVector::OneVector);
@@ -203,9 +207,9 @@ void AMapCreator::SetBarrierDensity()
 	int targetXIdx = targetPos.X / 100;
 	int targetYIdx = targetPos.Y / 100;
 	FVector2D startIdx(FMath::Min(startXIdx, targetXIdx), FMath::Min(startYIdx, targetYIdx));
-	FVector2D targetIdx(FMath::Max(startXIdx, targetXIdx), FMath::Max(startYIdx, targetYIdx));
+	FVector2D endIdx(FMath::Max(startXIdx, targetXIdx), FMath::Max(startYIdx, targetYIdx));
 
-	int sum = (targetIdx.X - startIdx.X + 1) * (targetIdx.Y - startIdx.Y + 1);
+	int sum = (endIdx.X - startIdx.X + 1) * (endIdx.Y - startIdx.Y + 1);
 
 	float currDensity = GetBarrierDensity(startPos, targetPos);
   if (currDensity < barrierDensity) {
@@ -215,12 +219,17 @@ void AMapCreator::SetBarrierDensity()
     int n = 0;
     while (n < m) {
       // 随机生成(x,y)
-      int32 randomX = UKismetMathLibrary::RandomInteger(targetIdx.X - startIdx.X + 1) + startIdx.X;
-      int32 randomY = UKismetMathLibrary::RandomInteger(targetIdx.Y - startIdx.Y + 1) + startIdx.Y;
+      int32 randomX = UKismetMathLibrary::RandomInteger(endIdx.X - startIdx.X + 1) + startIdx.X;
+      int32 randomY = UKismetMathLibrary::RandomInteger(endIdx.Y - startIdx.Y + 1) + startIdx.Y;
       auto flag = mapInfoArr[randomX * 75 + randomY];
       if (!flag.Equals("20")) {
         continue;
       }
+			if ((randomX == startIdx.X && randomY == startIdx.Y) || (randomX == endIdx.X && randomY == endIdx.Y)) {
+				// 剔除start与end
+				continue;
+			}
+
       // 在(x,y)生成障碍物
       FVector location = FVector(randomX * 100, randomY * 100, 0);
       FTransform transform(FRotator::ZeroRotator, location, FVector::OneVector);
@@ -244,42 +253,34 @@ void AMapCreator::SetBarrierDensity()
 
 void AMapCreator::SaveMapInfo()
 {
-	LoadMapInfo();
-	int startXIdx = startPos.X / 100;
-	int startYIdx = startPos.Y / 100;
-	int targetXIdx = targetPos.X / 100;
-	int targetYIdx = targetPos.Y / 100;
-	FVector2D startIdx(FMath::Min(startXIdx, targetXIdx), FMath::Min(startYIdx, targetYIdx));
-	FVector2D targetIdx(FMath::Max(startXIdx, targetXIdx), FMath::Max(startYIdx, targetYIdx));
 
-	// 将mapInfoArr输出到mapInfo.txt
-	for (int i = 0; i < 75; ++i) {
-		for (int j = 0; j < 75; ++j) {
-			if (mapInfoArr[i * 75 + j] != "20") {
-				mapInfoArr[i * 75 + j] = "10";
-			}
-			if ((i == startIdx.X && j == startIdx.Y) || (i == targetIdx.X && j == targetIdx.Y)) {
-				mapInfoArr[i * 75 + j] = "20";
-			}
-			if (i > startIdx.X && i < targetIdx.X && j > startIdx.Y && j < targetIdx.Y) {
-				mapInfoArr[i * 75 + j] = "20";
-			}
-		}
+	TArray<AActor*> outActors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AProp::StaticClass(), outActors);
+
+	int mapSize = 75 * 75;
+	// 所有prop输出为10，其余都输出为20
+	mapInfoArr.Init("20", mapSize);
+	for (const auto& prop : outActors) {
+		auto propPos = prop->GetActorLocation();
+		int xIdx = propPos.X / 100;
+		int yIdx = propPos.Y / 100;
+		mapInfoArr[xIdx * 75 + yIdx] = "10";
 	}
+
 	FString path = FPaths::ProjectDir() + FString("test.txt");
 	FFileHelper::SaveStringArrayToFile(mapInfoArr, *path);
-
+	mapInfoArr.Empty();
 }
 
 void AMapCreator::CreateMap()
 {
-	TArray<AActor*> outActors;
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AProp::StaticClass(), outActors);
-	int mapSize = 75 * 75;
-	if (outActors.Num() != mapSize) {
-		UE_LOG(LogTemp, Warning, TEXT("Map has been created."));
-		return;
-	}
+	//TArray<AActor*> outActors;
+	//UGameplayStatics::GetAllActorsOfClass(GetWorld(), AProp::StaticClass(), outActors);
+	//int barrierSize = 75 * 75;
+	//if (outActors.Num() == barrierSize) {
+	//	UE_LOG(LogTemp, Warning, TEXT("Map has been created."));
+	//	return;
+	//}
 
 	LoadMapInfo();
 
@@ -301,7 +302,7 @@ void AMapCreator::CreateMap()
 	FVector2D targetIdx(FMath::Max(startXIdx, targetXIdx), FMath::Max(startYIdx, targetYIdx));
 
 	// 在startPos和targetPos矩形之外在编辑器中生成障碍物，矩形之内在SetBarrierDensity函数中生成
-	for (int i = 0; i < mapInfoArr.Num(); ++i) {
+	for (int i = 0; i < mapInfoArr.Num(); ++i) { // mapInfoArr.Num() / 2
 		if (mapInfoArr[i] == "20") {
 			continue;
 		}
